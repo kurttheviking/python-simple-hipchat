@@ -1,6 +1,6 @@
-from urlparse import urljoin
-from urllib import urlencode
-import urllib2
+from urllib.parse import urljoin
+from urllib.parse import urlencode
+import urllib.request, urllib.error, urllib.parse
 import json
 
 
@@ -13,18 +13,18 @@ class HipChat(object):
         self.url = url
         self.token = token
         self.format = format
-        self.opener = urllib2.build_opener(urllib2.HTTPSHandler())
+        self.opener = urllib.request.build_opener(urllib.request.HTTPSHandler())
 
-    class RequestWithMethod(urllib2.Request):
+    class RequestWithMethod(urllib.request.Request):
         def __init__(self, url, data=None, headers={}, origin_req_host=None, unverifiable=False, http_method=None):
-            urllib2.Request.__init__(self, url, data, headers, origin_req_host, unverifiable)
+            urllib.request.Request.__init__(self, url, data, headers, origin_req_host, unverifiable)
             if http_method:
                 self.method = http_method
 
         def get_method(self):
             if self.method:
                 return self.method
-            return urllib2.Request.get_method(self)
+            return urllib.request.Request.get_method(self)
 
     def method(self, url, method="GET", parameters=None, timeout=None):
         method_url = urljoin(self.url, url)
@@ -51,10 +51,10 @@ class HipChat(object):
 
         method_url = method_url + '?' + query_string
 
-        req = self.RequestWithMethod(method_url, http_method=method, data=request_data)
+        req = self.RequestWithMethod(method_url, http_method=method, data=request_data.encode('utf-8'))
         response = self.opener.open(req, None, timeout).read()
 
-        return json.loads(response)
+        return json.loads(response.decode('utf-8'))
 
     def list_rooms(self):
         return self.method('rooms/list')
